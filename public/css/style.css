@@ -1135,6 +1135,35 @@ small, .text-muted {
   color: var(--navy);
 }
 
+.module-content ul,
+.module-content ol {
+  margin: 0 0 18px 20px;
+  padding: 0;
+}
+
+.module-content ul {
+  list-style: disc;
+}
+
+.module-content ol {
+  list-style: decimal;
+}
+
+.module-content li {
+  margin-bottom: 8px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+.module-content li strong {
+  color: var(--gold);
+}
+
+.module-content li:last-child {
+  margin-bottom: 0;
+}
+
 .key-points-card {
   margin-top: 24px;
 }

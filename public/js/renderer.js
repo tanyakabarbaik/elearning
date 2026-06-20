@@ -65,7 +65,7 @@ const Renderer = {
 
     let html = `
       <div class="module-view fade-slide-up">
-        <button class="btn btn-ghost btn-sm" onclick="Router.navigate('${chapterId}')">← Kembali ke Bab</button>
+        <div style="margin-bottom: 12px;"><button class="btn btn-ghost btn-sm" onclick="Router.navigate('${chapterId}')">← Kembali ke Bab</button></div>
         <h1 class="module-view-title">${mod.title}</h1>
         <div class="module-view-wrapper">
           <div class="content-column">
@@ -83,7 +83,7 @@ const Renderer = {
     if (mod.diagram) {
       html += `<div class="card diagram-card">
         <h3>Diagram</h3>
-        <div class="diagram-container">${mod.diagram}</div>
+        <div class="diagram-container">${Konten.svgDiagrams[mod.diagram]()}</div>
       </div>`;
     }
 
@@ -111,7 +111,7 @@ const Renderer = {
 
   renderSidebar(activeChapter) {
     const nav = document.getElementById('sidebarNav');
-    let html = '<div class="sidebar-section"><div class="sidebar-label">Daftar Bab</div>';
+    let html = '<div class="sidebar-section"><div class="sidebar-label">Daftar Modul</div>';
     Object.values(Konten.chapters).forEach(ch => {
       const totalMods = ch.modules.length;
       const prog = Progress.getProgress(ch.id, totalMods);
