@@ -21,6 +21,21 @@ app.use(session({
 const usersPath = path.join(__dirname, 'data', 'users.json');
 const users = JSON.parse(fs.readFileSync(usersPath, 'utf-8'));
 
+const notesPath = path.join(__dirname, 'data', 'notes.json');
+if (!fs.existsSync(notesPath)) {
+  fs.writeFileSync(notesPath, '{}', 'utf-8');
+}
+
+const progressPath = path.join(__dirname, 'data', 'progress.json');
+if (!fs.existsSync(progressPath)) {
+  fs.writeFileSync(progressPath, '{}', 'utf-8');
+}
+
+function auth(req, res, next) {
+  if (!req.session.user) return res.status(401).json({ error: 'Not authenticated' });
+  next();
+}
+
 app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
   const user = users.find(u => u.email === email);
@@ -39,6 +54,65 @@ app.post('/api/logout', (req, res) => {
 app.get('/api/me', (req, res) => {
   if (req.session.user) return res.json(req.session.user);
   res.status(401).json({ error: 'Not authenticated' });
+});
+
+app.get('/api/notes/:chapterId/:moduleId', auth, (req, res) => {
+  const key = `${req.session.user.email}-${req.params.chapterId}-${req.params.moduleId}`;
+  const notes = JSON.parse(fs.readFileSync(notesPath, 'utf-8'));
+  res.json({ content: notes[key] || '' });
+});
+
+app.post('/api/notes', auth, (req, res) => {
+  const { chapterId, moduleId, content } = req.body;
+  const key = `${req.session.user.email}-${chapterId}-${moduleId}`;
+  const notes = JSON.parse(fs.readFileSync(notesPath, 'utf-8'));
+  notes[key] = content;
+  fs.writeFileSync(notesPath, JSON.stringify(notes, null, 2), 'utf-8');
+  res.json({ success: true });
+});
+
+app.get('/api/progress', auth, (req, res) => {
+  const all = JSON.parse(fs.readFileSync(progressPath, 'utf-8'));
+  const userPrefix = `${req.session.user.email}-`;
+  const userProgress = {};
+  for (const key in all) {
+    if (key.startsWith(userPrefix)) {
+      userProgress[key.slice(userPrefix.length)] = all[key];
+    }
+  }
+  res.json(userProgress);
+});
+
+app.post('/api/progress', auth, (req, res) => {
+  const { chapterId, completed, quizScore } = req.body;
+  const key = `${req.session.user.email}-${chapterId}`;
+  const all = JSON.parse(fs.readFileSync(progressPath, 'utf-8'));
+  all[key] = { completed: completed || [], quizScore: quizScore ?? null };
+  fs.writeFileSync(progressPath, JSON.stringify(all, null, 2), 'utf-8');
+  res.json({ success: true });
+});
+
+app.put('/api/progress', auth, (req, res) => {
+  const all = JSON.parse(fs.readFileSync(progressPath, 'utf-8'));
+  const prefix = `${req.session.user.email}-`;
+  for (const key in all) {
+    if (key.startsWith(prefix)) delete all[key];
+  }
+  for (const chId in req.body) {
+    all[`${prefix}${chId}`] = req.body[chId];
+  }
+  fs.writeFileSync(progressPath, JSON.stringify(all, null, 2), 'utf-8');
+  res.json({ success: true });
+});
+
+app.delete('/api/progress', auth, (req, res) => {
+  const all = JSON.parse(fs.readFileSync(progressPath, 'utf-8'));
+  const prefix = `${req.session.user.email}-`;
+  for (const key in all) {
+    if (key.startsWith(prefix)) delete all[key];
+  }
+  fs.writeFileSync(progressPath, JSON.stringify(all, null, 2), 'utf-8');
+  res.json({ success: true });
 });
 
 app.get('*', (req, res) => {

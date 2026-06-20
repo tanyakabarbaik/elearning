@@ -407,6 +407,147 @@ small, .text-muted {
   animation: spin 0.8s linear infinite;
 }
 
+/* ---------- Modal ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal-card {
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-xl);
+  padding: 36px 32px 28px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  animation: fadeSlideUp 0.35s ease-out;
+}
+
+.modal-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.modal-message {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+  margin-bottom: 4px;
+}
+
+.modal-sub {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.5;
+  margin-bottom: 28px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.modal-btn {
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-width: 100px;
+}
+
+.modal-btn-cancel {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.modal-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.modal-btn-confirm {
+  background: linear-gradient(135deg, var(--gold), var(--gold-hover));
+  color: var(--navy);
+}
+
+.modal-btn-confirm:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-gold);
+}
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 300;
+  padding: 12px 28px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-full);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: all;
+}
+
+.toast-success {
+  background: rgba(34, 197, 94, 0.85);
+  border-color: rgba(34, 197, 94, 0.5);
+  color: #fff;
+}
+
+.toast-error {
+  background: rgba(239, 68, 68, 0.85);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fff;
+}
+
 /* =========================================
    APP SHELL
    ========================================= */
@@ -716,6 +857,30 @@ small, .text-muted {
   border-color: rgba(255, 255, 255, 0.15);
 }
 
+.header-reset-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.6);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+  line-height: 1;
+}
+
+.header-reset-btn:hover {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.08);
+}
+
 /* ---------- Main Content ---------- */
 .main-content {
   flex: 1;
@@ -832,16 +997,128 @@ small, .text-muted {
 }
 
 /* ---------- Module View ---------- */
-.module-view {
-  max-width: 800px;
-}
-
 .module-view-title {
   font-size: 26px;
   font-weight: 700;
   color: var(--text);
-  margin: 16px 0 24px;
+  margin: 0 0 24px;
   line-height: 1.35;
+}
+
+.module-view-wrapper {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+.content-column {
+  flex: 3;
+  min-width: 0;
+}
+
+.notes-panel {
+  flex: 1;
+  max-width: 300px;
+  min-width: 220px;
+  position: sticky;
+  top: calc(var(--header-height) + 24px);
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  max-height: calc(100vh - var(--header-height) - 48px);
+  display: flex;
+  flex-direction: column;
+}
+
+.notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid #eef0f4;
+}
+
+.notes-header h3 {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.notes-header .notes-status {
+  font-size: 11px;
+  color: var(--text-muted);
+  transition: color var(--transition-fast);
+}
+
+.notes-header .notes-status.saved {
+  color: #22c55e;
+}
+
+.notes-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eef0f4;
+  background: #fafbfc;
+}
+
+.notes-toolbar button {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.notes-toolbar button:hover {
+  background: #e8ecf0;
+  color: var(--text);
+}
+
+.notes-toolbar .toolbar-sep {
+  width: 1px;
+  height: 20px;
+  background: #e0e4e8;
+  margin: 0 4px;
+}
+
+.notes-editor {
+  flex: 1;
+  padding: 16px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+  overflow-y: auto;
+  min-height: 120px;
+  outline: none;
+}
+
+.notes-editor:empty::before {
+  content: 'Tulis catatan Anda di sini...';
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.notes-editor ul, .notes-editor ol {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.notes-editor p {
+  margin-bottom: 8px;
 }
 
 .module-content {
@@ -1589,6 +1866,17 @@ tbody tr:last-child td {
   .nav-buttons .btn {
     flex: 1;
     min-width: 0;
+  }
+
+  .module-view-wrapper {
+    flex-direction: column;
+  }
+
+  .notes-panel {
+    position: static;
+    max-width: none;
+    width: 100%;
+    max-height: none;
   }
 }
 

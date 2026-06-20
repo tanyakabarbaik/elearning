@@ -67,7 +67,9 @@ const Renderer = {
       <div class="module-view fade-slide-up">
         <button class="btn btn-ghost btn-sm" onclick="Router.navigate('${chapterId}')">← Kembali ke Bab</button>
         <h1 class="module-view-title">${mod.title}</h1>
-        <div class="module-content">${mod.content}</div>`;
+        <div class="module-view-wrapper">
+          <div class="content-column">
+            <div class="module-content">${mod.content}</div>`;
 
     if (mod.keyPoints && mod.keyPoints.length) {
       html += `<div class="card key-points-card">
@@ -94,13 +96,17 @@ const Renderer = {
       ${nextMod ? `<button class="btn btn-primary" onclick="Router.navigate('${chapterId}', '${nextMod.id}')">${nextMod.title} →</button>` : `<button class="btn btn-primary" onclick="Router.navigate('${chapterId}')">Selesai Bab →</button>`}
     </div>`;
 
-    html += '</div>';
+    html += `</div>`;
+    html += Notes.render(chapterId, moduleId);
+    html += `</div></div>`;
     wrapper.innerHTML = html;
 
     if (mod.quizIds && mod.quizIds.length) {
       const quizContainer = document.getElementById('quizContainer');
       Kuis.render(quizContainer, mod.quizIds);
     }
+
+    Notes.init(chapterId, moduleId);
   },
 
   renderSidebar(activeChapter) {
