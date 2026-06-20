@@ -92,8 +92,8 @@ const Renderer = {
     }
 
     html += `<div class="nav-buttons">
-      ${prevMod ? `<button class="btn btn-ghost" onclick="Router.navigate('${chapterId}', '${prevMod.id}')">← ${prevMod.title}</button>` : '<div></div>'}
-      ${nextMod ? `<button class="btn btn-primary" onclick="Router.navigate('${chapterId}', '${nextMod.id}')">${nextMod.title} →</button>` : `<button class="btn btn-primary" onclick="Router.navigate('${chapterId}')">Selesai Bab →</button>`}
+      ${prevMod ? `<button class="btn btn-ghost" onclick="Router.navigate('${chapterId}', '${prevMod.id}')">← Sebelumnya</button>` : ''}
+      ${nextMod ? `<button class="btn btn-primary" onclick="Router.navigate('${chapterId}', '${nextMod.id}')">Selanjutnya →</button>` : `<button class="btn btn-primary" onclick="Router.navigate('${chapterId}')">Selesai Bab →</button>`}
     </div>`;
 
     html += `</div>`;
@@ -107,6 +107,8 @@ const Renderer = {
     }
 
     Notes.init(chapterId, moduleId);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   },
 
   renderSidebar(activeChapter) {

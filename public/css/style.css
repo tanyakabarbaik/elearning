@@ -1472,6 +1472,25 @@ tbody tr:last-child td {
   border-bottom: none;
 }
 
+td small {
+  display: block;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+td em {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+td:first-child {
+  font-weight: 500;
+  background: var(--off-white);
+  white-space: nowrap;
+}
+
 /* ---------- Progress Bar ---------- */
 .progress-bar {
   height: 6px;
@@ -1492,6 +1511,7 @@ tbody tr:last-child td {
 /* ---------- Navigation Buttons ---------- */
 .nav-buttons {
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 12px;
   margin-top: 32px;
@@ -1500,7 +1520,7 @@ tbody tr:last-child td {
 }
 
 .nav-buttons .btn {
-  min-width: 120px;
+  min-width: 150px;
 }
 
 .nav-buttons .nav-spacer {
