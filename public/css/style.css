@@ -682,6 +682,7 @@ small, .text-muted {
   flex: 1;
   overflow-y: auto;
   padding: 16px 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 .sidebar-nav::-webkit-scrollbar {
@@ -727,6 +728,7 @@ small, .text-muted {
   color: rgba(255, 255, 255, 0.75);
   font-size: 14px;
   font-weight: 400;
+  touch-action: manipulation;
 }
 
 .sidebar-item:hover {
@@ -1898,6 +1900,7 @@ td:first-child {
 
   .sidebar.open {
     transform: translateX(0);
+    z-index: 99;
   }
 
   .sidebar-overlay.active {
