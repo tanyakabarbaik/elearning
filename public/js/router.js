@@ -29,7 +29,9 @@ const Router = {
 
   _route(chapterId, moduleId) {
     Renderer.renderSidebar(chapterId);
-    if (chapterId === 'evaluasi') {
+    if (chapterId === 'dashboard') {
+      Renderer.renderDashboard();
+    } else if (chapterId === 'evaluasi') {
       EvaluasiFinal.render();
     } else if (chapterId === 'referensi') {
       Renderer.renderReferensiAyat();

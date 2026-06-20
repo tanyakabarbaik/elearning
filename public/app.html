@@ -96,7 +96,7 @@
     const result = await Progress.reset();
     if (result) {
       showToast('Progress berhasil direset', 'success');
-      Router.navigate(Router.currentChapter || '1');
+      Router.navigate(Router.currentChapter || 'dashboard');
     } else {
       showToast('Gagal mereset progress', 'error');
     }
@@ -121,7 +121,7 @@
   });
   overlay.addEventListener('click', closeSidebar);
 
-  Router.navigate('1');
+  Router.navigate('dashboard');
 })();
 
 function showConfirmModal(message, sub) {

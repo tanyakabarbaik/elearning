@@ -111,9 +111,109 @@ const Renderer = {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   },
 
+  renderDashboard() {
+    const wrapper = document.getElementById('contentWrapper');
+
+    // compute stats
+    const allProgress = Progress.getAll();
+    let totalModules = 0, completedModules = 0;
+    const chapters = Object.values(Konten.chapters);
+    chapters.forEach(function(ch) {
+      const total = ch.modules.length;
+      totalModules += total;
+      const chData = allProgress[ch.id];
+      if (chData) completedModules += chData.completed ? chData.completed.length : 0;
+    });
+    const overallPct = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
+    const avgQuiz = Progress.getAverageQuizScore();
+    const evalAccess = Progress.isEvaluasiAccessible();
+    const finalData = Progress.getFinalExamData();
+
+    let examIcon = '🔒', examValue = 'Terkunci', examSub = 'Selesaikan semua bab & kuis';
+    if (finalData) { examIcon = '✅'; examValue = finalData.score + '%'; examSub = 'Selesai'; }
+    else if (evalAccess.ok) { examIcon = '🔓'; examValue = 'Tersedia'; examSub = 'Ikuti ujian sekarang'; }
+
+    let html = '<div class="dashboard-view fade-slide-up">';
+
+    // Welcome
+    html += '<div class="dashboard-welcome">' +
+      '<h1>👋 Selamat Datang, ' + Auth.user.name + '</h1>' +
+      '<p>Lanjutkan perjalanan belajarmu dari tempat terakhir kamu tinggalkan.</p>' +
+    '</div>';
+
+    // Stats grid
+    html += '<div class="dashboard-stats">';
+    html += '<div class="dashboard-stat"><div class="dashboard-stat-icon icon-modules">📚</div><div class="dashboard-stat-body"><div class="dashboard-stat-value">' + completedModules + '/' + totalModules + '</div><div class="dashboard-stat-label">Modul Selesai</div></div></div>';
+    html += '<div class="dashboard-stat"><div class="dashboard-stat-icon icon-quiz">📝</div><div class="dashboard-stat-body"><div class="dashboard-stat-value">' + avgQuiz + '%</div><div class="dashboard-stat-label">Rata-rata Skor Kuis</div></div></div>';
+    html += '<div class="dashboard-stat"><div class="dashboard-stat-icon icon-exam">' + examIcon + '</div><div class="dashboard-stat-body"><div class="dashboard-stat-value">' + examValue + '</div><div class="dashboard-stat-label">Ujian Final</div><div class="dashboard-stat-sub">' + examSub + '</div></div></div>';
+    html += '<div class="dashboard-stat"><div class="dashboard-stat-icon icon-progress">📊</div><div class="dashboard-stat-body"><div class="dashboard-stat-value">' + overallPct + '%</div><div class="dashboard-stat-label">Progress Keseluruhan</div></div></div>';
+    html += '</div>';
+
+    // Chapter progress list
+    html += '<div class="dashboard-section-title">📋 Progress per Bab</div>';
+    html += '<div class="dashboard-chapter-list">';
+    chapters.forEach(function(ch) {
+      const total = ch.modules.length;
+      const prog = Progress.getProgress(ch.id, total);
+      const chData = allProgress[ch.id];
+      const quizScore = chData ? chData.quizScore : null;
+      let fillClass = 'f0';
+      if (prog === 100) fillClass = 'f100';
+      else if (prog > 0) fillClass = 'f50';
+      const done = prog === 100;
+      const check = done ? '<span class="check">✅</span>' : '';
+      html += '<div class="dashboard-chapter-row ' + (done ? 'done' : '') + '" onclick="Router.navigate(\'' + ch.id + '\')">' +
+        '<div class="dashboard-chapter-num">' + ch.id + '</div>' +
+        '<div class="dashboard-chapter-info"><div class="dashboard-chapter-title">' + ch.title + check + '</div></div>' +
+        '<div class="dashboard-chapter-progress"><div class="dashboard-chapter-bar"><div class="dashboard-chapter-fill ' + fillClass + '" style="width:' + prog + '%"></div></div><div class="dashboard-chapter-pct">' + prog + '%</div></div>' +
+        '<div class="dashboard-chapter-quiz">' +
+          (quizScore !== null ? '<div class="dashboard-chapter-quiz-value">' + quizScore + '%</div><div class="dashboard-chapter-quiz-label">Kuis</div>' : '<div class="dashboard-chapter-quiz-value" style="color:#94a3b8;">—</div><div class="dashboard-chapter-quiz-label">Kuis</div>') +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+
+    // Quick actions
+    html += '<div class="dashboard-section-title">⚡ Aksi Cepat</div>';
+    html += '<div class="dashboard-actions">';
+    // Find first incomplete module
+    let resumeChapter = null, resumeModule = null;
+    for (var ci = 0; ci < chapters.length; ci++) {
+      var ch = chapters[ci];
+      var chData = allProgress[ch.id];
+      var doneIds = chData ? (chData.completed || []) : [];
+      for (var mi = 0; mi < ch.modules.length; mi++) {
+        if (!doneIds.includes(ch.modules[mi].id)) {
+          resumeChapter = ch.id;
+          resumeModule = ch.modules[mi].id;
+          break;
+        }
+      }
+      if (resumeChapter) break;
+    }
+    if (resumeChapter && resumeModule) {
+      html += '<button class="btn btn-primary" onclick="Router.navigate(\'' + resumeChapter + '\',\'' + resumeModule + '\')">▶ Lanjut Belajar</button>';
+    } else {
+      html += '<button class="btn btn-primary" onclick="Router.navigate(\'' + chapters[0].id + '\',\'' + chapters[0].modules[0].id + '\')">▶ Mulai Belajar</button>';
+    }
+    html += '<button class="btn btn-ghost" onclick="Router.navigate(\'referensi\')">📖 Ayat Referensi</button>';
+    html += '<button class="btn btn-ghost" onclick="Router.navigate(\'evaluasi\')">📋 Evaluasi Final</button>';
+    html += '</div>';
+
+    html += '</div>';
+    wrapper.innerHTML = html;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  },
+
   renderSidebar(activeChapter) {
     const nav = document.getElementById('sidebarNav');
-    let html = '<div class="sidebar-section"><div class="sidebar-label">Daftar Modul</div>';
+    let html = '<div class="sidebar-section">' +
+      '<div class="sidebar-item ' + (activeChapter === 'dashboard' ? 'active' : '') + '" onclick="Router.navigate(\'dashboard\')">' +
+        '<span class="sidebar-status">🏠</span>' +
+        '<div class="sidebar-item-content"><span class="sidebar-item-title">Beranda</span></div>' +
+      '</div>' +
+    '</div>';
+    html += '<div class="sidebar-section"><div class="sidebar-label">Daftar Modul</div>';
     Object.values(Konten.chapters).forEach(ch => {
       const totalMods = ch.modules.length;
       const prog = Progress.getProgress(ch.id, totalMods);
