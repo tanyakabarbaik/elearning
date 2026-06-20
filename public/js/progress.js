@@ -49,13 +49,49 @@ const Progress = {
     localStorage.setItem(this._key, JSON.stringify(all));
     const payload = {};
     for (const chId in all) {
-      payload[chId] = { completed: all[chId].completed, quizScore: all[chId].quizScore };
+      if (chId === 'finalExam') {
+        payload[chId] = all[chId];
+      } else {
+        payload[chId] = { completed: all[chId].completed, quizScore: all[chId].quizScore };
+      }
     }
     fetch('/api/progress', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     }).catch(() => {});
+  },
+
+  setFinalExamData(data) {
+    const all = this.getAll();
+    all.finalExam = data;
+    this._persist(all);
+  },
+
+  getFinalExamData() {
+    const all = this.getAll();
+    return all.finalExam || null;
+  },
+
+  getAverageQuizScore() {
+    let total = 0, count = 0;
+    for (const chId in Konten.chapters) {
+      const ch = this.getChapter(chId);
+      if (ch.quizScore !== null) { total += ch.quizScore; count++; }
+    }
+    return count > 0 ? Math.round(total / count) : 0;
+  },
+
+  isEvaluasiAccessible() {
+    for (const chId in Konten.chapters) {
+      const ch = Konten.chapters[chId];
+      const prog = this.getChapter(chId);
+      if (prog.completed.length < ch.modules.length) return { ok: false, reason: `Bab ${chId} (${ch.title}) belum 100% selesai` };
+      if (prog.quizScore === null) return { ok: false, reason: `Bab ${chId} (${ch.title}) belum memiliki nilai kuis` };
+    }
+    const avg = this.getAverageQuizScore();
+    if (avg <= 70) return { ok: false, reason: `Rata-rata nilai seluruh bab (${avg}%) belum mencapai > 70%` };
+    return { ok: true, avgScore: avg };
   },
 
   async reset() {

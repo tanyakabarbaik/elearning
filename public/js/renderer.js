@@ -130,6 +130,68 @@ const Renderer = {
       </div>`;
     });
     html += '</div>';
+    html += '<div class="sidebar-section">';
+    if (Konten.referensiAyat) {
+      html += `<div class="sidebar-item ${activeChapter === 'referensi' ? 'active' : ''}" onclick="Router.navigate('referensi')">
+        <span class="sidebar-status">📖</span>
+        <div class="sidebar-item-content">
+          <span class="sidebar-item-title">Ayat Referensi</span>
+          <span class="sidebar-item-sub">${Konten.referensiAyat.length} kategori</span>
+        </div>
+      </div>`;
+    }
+    html += '</div>';
+    html += '<div class="sidebar-section">';
+    const access = Progress.isEvaluasiAccessible();
+    const finalData = Progress.getFinalExamData();
+    let evalStatus = '○';
+    let evalLabel = 'Belum tersedia';
+    if (access.ok) { evalStatus = '🔓'; evalLabel = `${finalData ? finalData.score + '%' : 'Tersedia'}`; }
+    else { evalStatus = '🔒'; evalLabel = 'Terkunci'; }
+    html += `<div class="sidebar-item ${activeChapter === 'evaluasi' ? 'active' : ''}" onclick="Router.navigate('evaluasi')">
+      <span class="sidebar-status">${evalStatus}</span>
+      <div class="sidebar-item-content">
+        <span class="sidebar-item-title">Evaluasi Final</span>
+        <span class="sidebar-item-sub">${evalLabel}</span>
+      </div>
+    </div>`;
+    html += '</div>';
     nav.innerHTML = html;
+  },
+
+  renderReferensiAyat() {
+    const ref = Konten.referensiAyat;
+    if (!ref) return;
+
+    const wrapper = document.getElementById('contentWrapper');
+    let html = `
+      <div class="referensi-view fade-slide-up">
+        <h1 class="referensi-title" style="font-size:28px;margin-bottom:8px;">📖 Ayat Referensi</h1>
+        <p style="color:#64748b;margin-bottom:32px;">Ayat-ayat Alkitab Terjemahan Baru (TB) — Lembaga Alkitab Indonesia</p>`;
+
+    ref.forEach((cat, ci) => {
+      html += `<div class="referensi-kategori" style="margin-bottom:16px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+        <div onclick="const c=document.getElementById('ref-body-${ci}');const i=document.getElementById('ref-icon-${ci}');c.style.display=c.style.display==='none'?'grid':'none';i.textContent=i.textContent==='▸'?'▾':'▸'" style="cursor:pointer;padding:14px 18px;background:#f8fafc;display:flex;align-items:center;justify-content:space-between;user-select:none;">
+          <h2 style="font-size:16px;color:#d4a843;margin:0;">${cat.kategori}</h2>
+          <span id="ref-icon-${ci}" style="font-size:18px;color:#94a3b8;transition:transform 0.2s;">▸</span>
+        </div>
+        <div id="ref-body-${ci}" style="display:none;padding:0 18px 14px;gap:8px;">`;
+
+      cat.ayat.forEach((a, ai) => {
+        html += `<div class="referensi-ayat" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;">
+            <span style="font-weight:700;color:#1e293b;font-size:13px;">${a.ref}</span>
+            ${a.asal ? `<span style="font-size:11px;color:#94a3b8;background:#f1f5f9;padding:2px 8px;border-radius:4px;">${a.asal}</span>` : ''}
+          </div>
+          <p style="color:#475569;font-size:14px;margin:4px 0 0 0;line-height:1.5;">${a.teks}</p>
+        </div>`;
+      });
+
+      html += `</div></div>`;
+    });
+
+    html += `</div>`;
+    wrapper.innerHTML = html;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 };
