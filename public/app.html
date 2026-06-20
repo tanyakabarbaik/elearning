@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KACC E-Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="icon" href="/assets/logo_kacc.webp">
+</head>
+<body>
+<div id="app" class="app-layout hidden">
+  <header class="app-header">
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+    </button>
+    <img src="/assets/logo_kacc.webp" alt="KACC" class="header-logo">
+    <span class="header-title">KACC E-Learning</span>
+    <div class="header-right">
+      <span class="header-user-name" id="headerUser"></span>
+      <button class="header-logout-btn" id="logoutBtn">Keluar</button>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-nav" id="sidebarNav"></div>
+      <div class="sidebar-footer">
+        <div class="sidebar-user-avatar" id="sidebarUserAvatar">C</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarUser"></div>
+        </div>
+        <button class="sidebar-logout" id="sidebarLogout">Keluar</button>
+      </div>
+    </nav>
+
+    <main class="main-content" id="mainContent">
+      <div class="content-wrapper" id="contentWrapper">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Memuat...</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="loadingOverlay" class="loading-overlay hidden">
+  <div class="spinner"></div>
+</div>
+
+<script src="/js/konten.js"></script>
+<script src="/js/progress.js"></script>
+<script src="/js/kuis.js"></script>
+<script src="/js/renderer.js"></script>
+<script src="/js/router.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+(async function init() {
+  const ok = await Auth.check();
+  if (!ok) { window.location.href = '/'; return; }
+  document.getElementById('headerUser').textContent = Auth.user.name;
+  document.getElementById('sidebarUser').textContent = Auth.user.name;
+  document.getElementById('sidebarUserAvatar').textContent = Auth.user.name.charAt(0).toUpperCase();
+  document.getElementById('app').classList.remove('hidden');
+
+  Router.init();
+
+  document.getElementById('logoutBtn').addEventListener('click', () => Auth.logout());
+  document.getElementById('sidebarLogout').addEventListener('click', () => Auth.logout());
+
+  const hamburger = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const mainContent = document.getElementById('mainContent');
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+  }
+  hamburger.addEventListener('click', () => {
+    if (window.innerWidth > 1024) {
+      sidebar.classList.toggle('closed');
+      mainContent.classList.toggle('sidebar-closed');
+    } else {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    }
+  });
+  overlay.addEventListener('click', closeSidebar);
+
+  Router.navigate('1');
+})();
+</script>
+</body>
+</html>
