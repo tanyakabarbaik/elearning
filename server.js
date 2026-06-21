@@ -1,12 +1,16 @@
 const express = require('express');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const sanitizeHtml = require('sanitize-html');
 const fs = require('fs');
 const path = require('path');
 
 const app = express();
 const PORT = 3000;
 
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -15,8 +19,14 @@ app.use(session({
   secret: 'kacc-session-secret-2026',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 86400000 }
+  cookie: { maxAge: 86400000, sameSite: 'lax' }
 }));
+
+const loginLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 5,
+  message: { error: 'Terlalu banyak percobaan login. Coba lagi dalam 1 menit.' }
+});
 
 const usersPath = path.join(__dirname, 'data', 'users.json');
 const users = JSON.parse(fs.readFileSync(usersPath, 'utf-8'));
@@ -36,7 +46,7 @@ function auth(req, res, next) {
   next();
 }
 
-app.post('/api/login', (req, res) => {
+app.post('/api/login', loginLimiter, (req, res) => {
   const { email, password } = req.body;
   const user = users.find(u => u.email === email);
   if (!user) return res.status(401).json({ error: 'Email atau password salah' });
@@ -66,7 +76,10 @@ app.post('/api/notes', auth, (req, res) => {
   const { chapterId, moduleId, content } = req.body;
   const key = `${req.session.user.email}-${chapterId}-${moduleId}`;
   const notes = JSON.parse(fs.readFileSync(notesPath, 'utf-8'));
-  notes[key] = content;
+  notes[key] = sanitizeHtml(content, {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'h1', 'h2']),
+    allowedAttributes: { a: ['href'], img: ['src', 'alt'] }
+  });
   fs.writeFileSync(notesPath, JSON.stringify(notes, null, 2), 'utf-8');
   res.json({ success: true });
 });
